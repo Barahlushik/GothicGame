@@ -4,7 +4,7 @@ from tile import Tile
 from player import Player
 from weapon import Weapon
 from support import import_csv_layout
-
+from ui import UI
 
 class Level:
     def __init__(self):
@@ -19,10 +19,13 @@ class Level:
         # weapon var
         self.current_attack = None
 
+        # ui init
+        self.ui = UI()
+
     def create_map(self):
 
         layouts = {
-            'boundary': import_csv_layout('res/map/boundary.csv')
+            'boundary': import_csv_layout('../res/map/boundary.csv')
         }
 
         for style, layout in layouts.items():
@@ -46,6 +49,7 @@ class Level:
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
+        self.ui.display(self.player)
 
 
 class YSortCameraGroup(pygame.sprite.Group):
@@ -56,7 +60,7 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.half_width = self.display_surface.get_size()[0] // 2
         self.half_height = self.display_surface.get_size()[1] // 2
 
-        self.floor_surface = pygame.image.load('res/map/map.png')
+        self.floor_surface = pygame.image.load('../res/map/map.png')
         self.floor_rect = self.floor_surface.get_rect(topleft=(0, 0))
 
     def custom_draw(self, player):

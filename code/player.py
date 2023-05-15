@@ -7,7 +7,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups, obstacle_sprites,create_attack, destroy_attack):
         super().__init__(groups)
         self.image = pygame.image.load(
-            'res/player/down/down_1.png').convert_alpha()
+            '../res/player/down/down_1.png').convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(-60, -60)
         self.speed = 5
@@ -28,7 +28,13 @@ class Player(pygame.sprite.Sprite):
         # attack
         self.create_attack = create_attack
         self.destroy_attack = destroy_attack
-
+        # stats
+        self.stats = {'health': 100, 'energy': 100, 'attack': 10, 'speed': 20, 'heals': 5}
+        self.health = self.stats['health']
+        self.energy = self.stats['energy']
+        self.exp = 500
+        self.speed = self.stats['speed']
+        self.heals = self.stats['heals']
 
 
     def input(self):  # Disabling movement during an attack
@@ -58,7 +64,7 @@ class Player(pygame.sprite.Sprite):
                 self.create_attack() # create Weapon object
     # Function sets to a certain key the corresponding set of sprites from the folder "res/player/"
     def import_player_assets(self):
-        path = './res/player/'
+        path = '../res/player/'
         self.animations = {'up': [], 'down': [], 'left': [], 'right': [],
                            'up_attack': [], 'down_attack': [], 'left_attack': [], 'right_attack': [],
                            'down_idle': [], 'up_idle': [], 'left_idle': [], 'right_idle': []}
