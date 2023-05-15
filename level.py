@@ -2,7 +2,7 @@ import pygame
 from settings import *
 from tile import Tile
 from player import Player
-
+from weapon import Weapon
 from support import import_csv_layout
 
 
@@ -15,6 +15,9 @@ class Level:
         self.obstacle_sprites = pygame.sprite.Group()
 
         self.create_map()
+
+        # weapon var
+        self.current_attack = None
 
     def create_map(self):
 
@@ -31,8 +34,15 @@ class Level:
                         if style == 'boundary':
                             Tile((x, y), self.obstacle_sprites, 'invisible')
 
-        self.player = Player((1300, 1650), self.visible_sprites, self.obstacle_sprites)
+        self.player = Player((1300, 1850), self.visible_sprites, self.obstacle_sprites,self.create_attack,self.destroy_attack)
 
+    def create_attack(self):
+        self.current_attack = Weapon(self.player, [self.visible_sprites])
+
+    def destroy_attack(self):
+        if self.current_attack:
+            self.current_attack.kill()
+        self.current_attack = None
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
@@ -40,7 +50,6 @@ class Level:
 
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self):
-
         super().__init__()
         self.display_surface = pygame.display.get_surface()
         self.offset = pygame.math.Vector2()
@@ -51,7 +60,6 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.floor_rect = self.floor_surface.get_rect(topleft=(0, 0))
 
     def custom_draw(self, player):
-
         self.offset.x = player.rect.centerx - self.half_width
         self.offset.y = player.rect.centery - self.half_height
 

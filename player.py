@@ -4,7 +4,7 @@ from support import import_folder
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, obstacle_sprites):
+    def __init__(self, pos, groups, obstacle_sprites,create_attack, destroy_attack):
         super().__init__(groups)
         self.image = pygame.image.load(
             'res/player/down/down_1.png').convert_alpha()
@@ -17,14 +17,19 @@ class Player(pygame.sprite.Sprite):
         self.attacking = False  # attack flag
         self.attack_cooldown = 400
         self.attack_time = None
-
+        self.obstacle_sprites = obstacle_sprites
         self.frame_index = 0  # index of animation sprite
         self.animation_speed = 0.15
 
         self.status = 'down'
         ############ end animation var block ############
         self.direction = pygame.math.Vector2()
-        self.obstacle_sprites = obstacle_sprites
+
+        # attack
+        self.create_attack = create_attack
+        self.destroy_attack = destroy_attack
+
+
 
     def input(self):  # Disabling movement during an attack
         if not self.attacking:
@@ -50,7 +55,7 @@ class Player(pygame.sprite.Sprite):
             if keys[pygame.K_SPACE]:
                 self.attacking = True
                 self.attack_time = pygame.time.get_ticks()
-
+                self.create_attack() # create Weapon object
     # Function sets to a certain key the corresponding set of sprites from the folder "res/player/"
     def import_player_assets(self):
         path = './res/player/'
@@ -67,6 +72,7 @@ class Player(pygame.sprite.Sprite):
         if self.attacking:
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.attacking = False
+                self.destroy_attack() # destroy Weapon object sprite
 
     # The function sets the status of the player's action based on the movement and the initial status
     def get_status(self):
