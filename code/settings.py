@@ -21,4 +21,8 @@ TEXT_COLOR = '#EEEEEE'
 HEALTH_COLOR = '#8B0000'
 ENERGY_COLOR = '#006400'
 
+monster_data = {
+    'opolchenets': {'health': 150, 'exp': 200, 'damage': 20, 'speed': 4, 'resistance': 3,
+                    'attack_radius': 100, 'notice_radius': 500},
 
+}
