@@ -4,7 +4,7 @@ from support import import_folder
 from entity import Entity
 
 class Player(Entity):
-    def __init__(self, pos, groups, obstacle_sprites,create_attack, destroy_attack):
+    def __init__(self, pos, groups, obstacle_sprites,create_attack, destroy_attack,create_abilities):
         super().__init__(groups)
         self.image = pygame.image.load(
             '../res/player/down/down_1.png').convert_alpha()
@@ -39,7 +39,17 @@ class Player(Entity):
         self.exp = 500
         self.speed = self.stats['speed']
         self.heals = self.stats['heals']
-
+        # create abilities block
+        self.create_abilities = create_abilities
+        self.using_health_ability = False
+        self.using_roll_ability = False
+        self.heal_time = None
+        self.roll_time = None
+        self.using_health_ability_cooldown = 4000
+        self.using_roll_ability_cooldown = 500
+        self.roll_bonus = 20
+        self.roll_duration = 100
+        self.roll_decrement = False
 
     def input(self):  # Disabling movement during an attack
         if not self.attacking:
@@ -61,11 +71,22 @@ class Player(Entity):
                 self.status = 'right'  # "res/player/right" group of sprites
             else:
                 self.direction.x = 0
-
+            # attack
             if keys[pygame.K_SPACE]:
                 self.attacking = True
                 self.attack_time = pygame.time.get_ticks()
                 self.create_attack() # create Weapon object
+        if not self.using_health_ability:
+            if keys[pygame.K_f]:
+                if self.create_abilities('heal', self.stats['health']/2, 0):
+                    self.using_health_ability = True
+                    self.heal_time = pygame.time.get_ticks()
+        if not self.using_roll_ability:
+            if keys[pygame.K_LSHIFT]:
+                if self.create_abilities('roll', self.roll_bonus, 25):
+                    self.roll_decrement = True
+                    self.using_roll_ability = True
+                    self.roll_time = pygame.time.get_ticks()
     # Function sets to a certain key the corresponding set of sprites from the folder "res/player/"
     def import_player_assets(self):
         path = '../res/player/'
@@ -86,6 +107,16 @@ class Player(Entity):
         if not self.vulnerable:
             if current_time - self.hurt_time >= self.invulnerability_duration:
                 self.vulnerable = True
+        if self.using_health_ability:
+            if current_time - self.heal_time >= self.using_health_ability_cooldown:
+                self.using_health_ability = False
+        if self.using_roll_ability:
+            if self.roll_decrement:
+                if current_time - self.roll_time >= self.roll_duration:
+                    self.speed -= self.roll_bonus
+                    self.roll_decrement = False
+            if current_time - self.roll_time >= self.using_roll_ability_cooldown:
+                self.using_roll_ability = False
 
     # The function sets the status of the player's action based on the movement and the initial status
     def get_status(self):
@@ -125,6 +156,11 @@ class Player(Entity):
         weapon_damage = weapon_data[self.weapon]['damage']
         return base_damage + weapon_damage
 
+    def energy_recovery(self):
+        if self.energy < self.stats['energy']:
+            self.energy += 0.25
+        else:
+            self.energy = self.stats['energy']
     # @Override
     def update(self):
         self.input()
@@ -132,3 +168,4 @@ class Player(Entity):
         self.get_status()  # update self.status
         self.animate()  # draw sprite
         self.move(self.speed)
+        self.energy_recovery()

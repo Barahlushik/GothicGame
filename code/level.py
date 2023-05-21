@@ -1,4 +1,6 @@
 import pygame
+
+from abilities import *
 from settings import *
 from tile import Tile
 from player import Player
@@ -47,7 +49,7 @@ class Level:
                         if style == 'entities':
                             if col == '26':
                                 self.player = Player((x, y), self.visible_sprites, self.obstacle_sprites,
-                                                     self.create_attack, self.destroy_attack)
+                                                     self.create_attack, self.destroy_attack,self.create_abilities)
                             elif col == '4274':
                                 self.enemy = Enemy('opolchenets', (x, y),
                                                   [self.visible_sprites,self.attackable_sprites],
@@ -81,6 +83,12 @@ class Level:
     def player_death_handler(self):
         if self.player.health <= 0:
             self.is_player_death = True
+
+    def create_abilities(self, style, strength, cost):
+        if style == 'heal':
+            return heal(self.player, strength, cost)
+        elif style == 'roll':
+            return roll(self.player, strength, cost)
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
