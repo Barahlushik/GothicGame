@@ -15,6 +15,9 @@ class Level:
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
 
+        self.attackable_sprites = pygame.sprite.Group() # enemy
+        self.attack_sprites = pygame.sprite.Group() # weapon
+
         self.create_map()
 
         # weapon var
@@ -44,20 +47,38 @@ class Level:
                                                      self.create_attack, self.destroy_attack)
                             elif col == '4274':
                                 self.enemy = Enemy('opolchenets', (x, y),
-                                                  self.visible_sprites,
-                                                  self.obstacle_sprites)
+                                                  [self.visible_sprites,self.attackable_sprites],
+                                                  self.obstacle_sprites,self.damage_player, self.add_exp)
 
     def create_attack(self):
-        self.current_attack = Weapon(self.player, [self.visible_sprites])
+        self.current_attack = Weapon(self.player, [self.visible_sprites,self.attack_sprites])
 
     def destroy_attack(self):
         if self.current_attack:
             self.current_attack.kill()
         self.current_attack = None
+
+    def add_exp(self, amount):
+        self.player.exp += amount
+
+    def damage_player(self, amount):
+        if self.player.vulnerable:
+            self.player.health -= amount
+            self.player.vulnerable = False
+            self.player.hurt_time = pygame.time.get_ticks()
+
+    def player_attack_logic(self):
+        if self.attack_sprites:
+            for attack_sprite in self.attack_sprites:
+                for sprite in self.attackable_sprites:
+
+                    if attack_sprite.rect.colliderect(sprite.hitbox):
+                        sprite.get_damage(self.player, attack_sprite.sprite_type)
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
-        self.visible_sprites.enemy_update(self.player) #
+        self.visible_sprites.enemy_update(self.player)
+        self.player_attack_logic()
         self.ui.display(self.player)
 
 

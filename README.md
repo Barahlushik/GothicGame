@@ -8,3 +8,5 @@ Implementation of a mini-game using the pygame library.
 ![](res/README_res/ui.png)
 ## Enemy animation 
 ![](res/README_res/enemy_animation.gif)
+## Enemy and player interaction
+![](res/README_res/enemy_attack.gif)

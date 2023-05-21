@@ -1,5 +1,5 @@
 import pygame
-
+from settings import *
 from support import import_folder
 from entity import Entity
 
@@ -9,7 +9,7 @@ class Player(Entity):
         self.image = pygame.image.load(
             '../res/player/down/down_1.png').convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
-        self.hitbox = self.rect.inflate(-60, -60)
+        self.hitbox = self.rect.inflate(-80, -40)
         self.speed = 5
         ############ start animation var block ############
         self.import_player_assets()  # import player sprites
@@ -25,6 +25,10 @@ class Player(Entity):
         ############ end animation var block ############
         self.direction = pygame.math.Vector2()
 
+        self.vulnerable = True # player can get damage from enemy, if false - not
+        self.hurt_time = None # timer
+        self.invulnerability_duration = 500 # invulnerability time after the attack
+        self.weapon = list(weapon_data.keys())[0]
         # attack
         self.create_attack = create_attack
         self.destroy_attack = destroy_attack
@@ -79,6 +83,9 @@ class Player(Entity):
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.attacking = False
                 self.destroy_attack() # destroy Weapon object sprite
+        if not self.vulnerable:
+            if current_time - self.hurt_time >= self.invulnerability_duration:
+                self.vulnerable = True
 
     # The function sets the status of the player's action based on the movement and the initial status
     def get_status(self):
@@ -105,8 +112,18 @@ class Player(Entity):
             self.frame_index = 0
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center=self.hitbox.center)
+        # block creates a flickering sprite after impact
+        if not self.vulnerable:
+            alpha = self.wave_value()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)
 
-
+    # calculate weapon + player damage
+    def get_full_weapon_damage(self):
+        base_damage = self.stats['attack']
+        weapon_damage = weapon_data[self.weapon]['damage']
+        return base_damage + weapon_damage
 
     # @Override
     def update(self):

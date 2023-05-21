@@ -5,7 +5,7 @@ from support import *
 
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacle_sprites):
+    def __init__(self, monster_name, pos, groups, obstacle_sprites,damage_player,add_exp ):
         super().__init__(groups)
         self.sprite_type = 'enemy'
         self.status = 'idle'  # init position
@@ -15,7 +15,7 @@ class Enemy(Entity):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = self.rect.inflate(-215, -85)  # trim the empty area
         self.obstacle_sprites = obstacle_sprites
-        self.can_attack = True
+
         self.monster_name = monster_name
         monster_info = monster_data[self.monster_name]
         self.health = monster_info['health']
@@ -25,6 +25,16 @@ class Enemy(Entity):
         self.resistance = monster_info['resistance']
         self.attack_radius = monster_info['attack_radius']
         self.notice_radius = monster_info['notice_radius']
+
+        self.damage_player = damage_player
+        self.add_exp = add_exp
+        self.can_attack = True
+        self.attack_time = None
+        self.attack_cooldown = 700
+
+        # Timer
+        self.vulnerable = True
+        self.invincibility_time = 300
 
     def import_graphics(self, name):
         # the keys equal to the names of the directories
@@ -61,6 +71,12 @@ class Enemy(Entity):
 
         self.image = animation[int(self.frame_index)]  # get a sprite
         self.rect = self.image.get_rect(center=self.hitbox.center)
+
+        if not self.vulnerable:
+            alpha = self.wave_value()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)
 
     # The function calculates self.status based on direction && distance
     def get_status(self, player):
@@ -99,16 +115,53 @@ class Enemy(Entity):
             self.status = 'idle'
 
     def actions(self, player):
+        if 'attack' in self.status:
+            self.attack_time = pygame.time.get_ticks()
+            self.damage_player(self.attack_damage)
         if self.status != 'idle':  # If the status is not idle, the enemy goes to the player
+            self.attack_time = pygame.time.get_ticks() # time for cooldown
             self.direction = self.get_player_distance_direction(player)[1]
         else:
             self.direction = pygame.math.Vector2()  # enemy just stands
 
+    def cooldowns(self):
+        # common time
+        current_time = pygame.time.get_ticks()
+
+        #attack cooldown timer
+        if not self.can_attack:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.attack_time >= self.attack_cooldown:
+                self.can_attack = True
+        # get damage from player timer
+        if not self.vulnerable:
+            if current_time - self.hit_time >= self.invincibility_time:
+                self.vulnerable = True
+
+    def get_damage(self, player, attack_type):
+        if self.vulnerable:
+            if attack_type == 'weapon':
+                self.health -= player.get_full_weapon_damage()
+            self.hit_time = pygame.time.get_ticks()
+            self.vulnerable = False
+
+    # Removes a sprite if the enemy has no health
+    def check_death(self):
+        if self.health <= 0:
+            self.kill()
+            self.add_exp(self.exp)
+
+    # Throws the enemy after a hit by self.resistance
+    def hit_reaction(self):
+        if not self.vulnerable:
+            self.direction *= -self.resistance
     # @Override
     def update(self):
-
+        self.hit_reaction()
         self.move(self.speed)
         self.animate()
+        self.cooldowns()
+        self.check_death()
 
     #This function updates the sprites in level.py
     def enemy_update(self, player):
