@@ -26,6 +26,9 @@ class Level:
         # ui init
         self.ui = UI()
 
+        # player_death_flag
+        self.is_player_death = False
+
     def create_map(self):
 
         layouts = {
@@ -74,11 +77,16 @@ class Level:
 
                     if attack_sprite.rect.colliderect(sprite.hitbox):
                         sprite.get_damage(self.player, attack_sprite.sprite_type)
+    # The function checks if the player is dead
+    def player_death_handler(self):
+        if self.player.health <= 0:
+            self.is_player_death = True
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
         self.player_attack_logic()
+        self.player_death_handler()
         self.ui.display(self.player)
 
 
