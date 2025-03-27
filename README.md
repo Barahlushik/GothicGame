@@ -1,5 +1,4 @@
-<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-<img src="https://img.shields.io/badge/Pygame-FF7F00?style=for-the-badge&logo=pygame&logoColor=white" alt="Pygame">
+<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"><img src="https://img.shields.io/badge/Pygame-FF7F00?style=for-the-badge&logo=pygame&logoColor=white" alt="Pygame">
 
 Реализация мини-игры в стиле Dark Souls с использованием библиотеки Pygame. Сразитесь с врагами, используйте способности и очистите карту от противников!
 
