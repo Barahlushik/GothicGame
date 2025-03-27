@@ -51,43 +51,46 @@ class Player(Entity):
         self.roll_duration = 100
         self.roll_decrement = False
 
-    def input(self):  # Disabling movement during an attack
+    def input(self):
+        keys = pygame.key.get_pressed()
+
         if not self.attacking:
-            keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
                 self.direction.y = -1
-                self.status = 'up'  # "res/player/up" group of sprites
+                self.status = 'up'
             elif keys[pygame.K_s]:
                 self.direction.y = 1
-                self.status = 'down'  # "res/player/down" group of sprites
+                self.status = 'down'
             else:
                 self.direction.y = 0
 
             if keys[pygame.K_a]:
                 self.direction.x = -1
-                self.status = 'left'  # "res/player/left" group of sprites
+                self.status = 'left'
             elif keys[pygame.K_d]:
                 self.direction.x = 1
-                self.status = 'right'  # "res/player/right" group of sprites
+                self.status = 'right'
             else:
                 self.direction.x = 0
-            # attack
+
             if keys[pygame.K_SPACE]:
                 self.attacking = True
                 self.attack_time = pygame.time.get_ticks()
-                self.create_attack() # create Weapon object
-        if not self.using_health_ability:
-            if keys[pygame.K_f]:
-                if self.create_abilities('heal', self.stats['health']/2, 0):
-                    self.using_health_ability = True
-                    self.heal_time = pygame.time.get_ticks()
-        if not self.using_roll_ability:
-            if keys[pygame.K_LSHIFT]:
-                if self.create_abilities('roll', self.roll_bonus, 25):
-                    self.roll_decrement = True
-                    self.using_roll_ability = True
-                    self.roll_time = pygame.time.get_ticks()
-    # Function sets to a certain key the corresponding set of sprites from the folder "res/player/"
+                self.create_attack()
+
+
+        if not self.using_health_ability and keys[pygame.K_f]:
+            if self.create_abilities('heal', self.stats['health'] / 2, 0):
+                self.using_health_ability = True
+                self.heal_time = pygame.time.get_ticks()
+
+        if not self.using_roll_ability and keys[pygame.K_LSHIFT]:
+            if self.create_abilities('roll', self.roll_bonus, 25):
+                self.roll_decrement = True
+                self.using_roll_ability = True
+                self.roll_time = pygame.time.get_ticks()
+
+
     def import_player_assets(self):
         path = '../res/player/'
         self.animations = {'up': [], 'down': [], 'left': [], 'right': [],
@@ -97,7 +100,7 @@ class Player(Entity):
             full_path = path + animation
             self.animations[animation] = import_folder(full_path)
 
-    # Function checks the cooldown
+
     def cooldowns(self):
         current_time = pygame.time.get_ticks()
         if self.attacking:
@@ -135,7 +138,7 @@ class Player(Entity):
             if 'attack' in self.status:
                 self.status = self.status.replace('_attack', '')
 
-    # The main animation function that assigns self.image && self.rect according to self.animation_speed
+
     def animate(self):
         animation = self.animations[self.status]
         self.frame_index += self.animation_speed
@@ -150,7 +153,7 @@ class Player(Entity):
         else:
             self.image.set_alpha(255)
 
-    # calculate weapon + player damage
+
     def get_full_weapon_damage(self):
         base_damage = self.stats['attack']
         weapon_damage = weapon_data[self.weapon]['damage']

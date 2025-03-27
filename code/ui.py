@@ -6,17 +6,15 @@ class UI:
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font(UI_FONT, UI_FONT_SIZE)
-        # BAR SETUP
         self.health_bar_rect = pygame.Rect(10, 10, HEALTH_BAR_WIDTH, BAR_HEIGHT)
         self.energy_bar_rect = pygame.Rect(10, 34, ENERGY_BAR_WIDTH, BAR_HEIGHT)
 
     def show_bar(self, current, max_amount, bg_rect, color):
         pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
-        ratio = current / max_amount  # 95 / 100 = 0.95
-        current_width = bg_rect.width * ratio  # new width
-        current_rect = bg_rect.copy()  # copy for changing
-        current_rect.width = current_width  # set new width for the copy
-
+        ratio = current / max_amount
+        current_width = bg_rect.width * ratio
+        current_rect = bg_rect.copy()
+        current_rect.width = current_width
         pygame.draw.rect(self.display_surface, color, current_rect)  # color_of_bar
         pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)  # border
 
